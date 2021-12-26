@@ -181,20 +181,6 @@ def get_models(case, keys):
     return models
 
 
-# def parse_precisions(model_precisions): # column Precisions
-#     try:
-#         subprocess.check_output(
-#             [
-#                 sys.executable, '--precisions', ','.join(model_precisions), '--jobs', 'auto',
-#
-#             ],
-#             stderr=subprocess.STDOUT, universal_newlines=True)
-#     except subprocess.CalledProcessError as e:
-#         print(e.output)
-#         print('Exit code:', e.returncode)
-#         sys.exit(1)
-#     precisions = "F16"
-#     return model_precisions
 
 def main():
     args = parse_args()
@@ -209,22 +195,7 @@ def main():
         [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'), '--all'],
         universal_newlines=True))
 
-    # def parse_precisions():  # column Precisions
-    #     model_precisions = parser_precisions(args.precisions)
-    #     # try:
-    #     #     model_precisions=parse_supported_device_list(args.precisions)
-    #     #     subprocess.check_output(
-    #     #         [
-    #     #             sys.executable, '--precisions', ','.join(model_precisions), '--jobs', 'auto',
-    #     #
-    #     #         ],
-    #     #         stderr=subprocess.STDOUT, universal_newlines=True)
-    #     # except subprocess.CalledProcessError as e:
-    #     #     print(e.output)
-    #     #     print('Exit code:', e.returncode)
-    #     #     sys.exit(1)
-    #     # #precisions = "F16"
-    #     return model_precisions
+
 
     model_info = {}
     for model_data in model_info_list:
