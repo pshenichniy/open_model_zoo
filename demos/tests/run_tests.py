@@ -34,7 +34,7 @@ import json
 import os
 import platform
 import shlex
-import subprocess # nosec - disable B404:import-subprocess check
+import subprocess  # nosec - disable B404:import-subprocess check
 import sys
 import tempfile
 import timeit
@@ -49,42 +49,44 @@ from data_sequences import DATA_SEQUENCES
 def parser_paths_list(supported_devices):
     paths = supported_devices.split(',')
     return [Path(p) for p in paths if Path(p).is_file()]
-
+# def parser_precisions(precisions):
+#     precisions_str = precisions
+#     return str(precisions_str)
 
 def parse_args():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter, description=__doc__)
     parser.add_argument('--demo-build-dir', type=Path, required=True, metavar='DIR',
-        help='directory with demo binaries')
+                        help='directory with demo binaries')
     parser.add_argument('--test-data-dir', type=Path, required=True, metavar='DIR',
-        help='directory with test data')
+                        help='directory with test data')
     parser.add_argument('--downloader-cache-dir', type=Path, required=True, metavar='DIR',
-        help='directory to use as the cache for the model downloader')
+                        help='directory to use as the cache for the model downloader')
     parser.add_argument('--demos', metavar='DEMO[,DEMO...]',
-        help='list of demos to run tests for (by default, every demo is tested)')
+                        help='list of demos to run tests for (by default, every demo is tested)')
     parser.add_argument('--mo', type=Path, metavar='MO.PY',
-        help='Model Optimizer entry point script')
+                        help='Model Optimizer entry point script')
     parser.add_argument('--devices', default="CPU GPU",
-        help='list of devices to test')
+                        help='list of devices to test')
     parser.add_argument('--report-file', type=Path,
-        help='path to report file')
+                        help='path to report file')
     parser.add_argument('--supported-devices', type=parser_paths_list, required=False,
-        help='paths to Markdown files with supported devices for each model')
+                        help='paths to Markdown files with supported devices for each model')
     parser.add_argument('--precisions', type=str, nargs='+', default=['FP16'],
-        help='IR precisions for all models. By default, models are tested in FP16 precision')
+                        help='IR precisions for all models. By default, models are tested in FP16 precision')
     parser.add_argument('--models-dir', type=Path, required=False, metavar='DIR',
-        help='directory with pre-converted models (IRs)')
+                        help='directory with pre-converted models (IRs)')
     return parser.parse_args()
 
 
-def collect_result(demo_name, device, pipeline, execution_time, report_file):
+def collect_result(demo_name, device, pipeline, execution_time, model_precisions, report_file):
     first_time = not report_file.exists()
 
     with report_file.open('a+', newline='') as csvfile:
         testwriter = csv.writer(csvfile)
         if first_time:
-            testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime"])
-        testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)), execution_time])
+            testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime", "Precision"])
+        testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)), execution_time, model_precisions])
 
 
 @contextlib.contextmanager
@@ -179,6 +181,21 @@ def get_models(case, keys):
     return models
 
 
+# def parse_precisions(model_precisions): # column Precisions
+#     try:
+#         subprocess.check_output(
+#             [
+#                 sys.executable, '--precisions', ','.join(model_precisions), '--jobs', 'auto',
+#
+#             ],
+#             stderr=subprocess.STDOUT, universal_newlines=True)
+#     except subprocess.CalledProcessError as e:
+#         print(e.output)
+#         print('Exit code:', e.returncode)
+#         sys.exit(1)
+#     precisions = "F16"
+#     return model_precisions
+
 def main():
     args = parse_args()
 
@@ -191,6 +208,23 @@ def main():
     model_info_list = json.loads(subprocess.check_output(
         [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'), '--all'],
         universal_newlines=True))
+
+    # def parse_precisions():  # column Precisions
+    #     model_precisions = parser_precisions(args.precisions)
+    #     # try:
+    #     #     model_precisions=parse_supported_device_list(args.precisions)
+    #     #     subprocess.check_output(
+    #     #         [
+    #     #             sys.executable, '--precisions', ','.join(model_precisions), '--jobs', 'auto',
+    #     #
+    #     #         ],
+    #     #         stderr=subprocess.STDOUT, universal_newlines=True)
+    #     # except subprocess.CalledProcessError as e:
+    #     #     print(e.output)
+    #     #     print('Exit code:', e.returncode)
+    #     #     sys.exit(1)
+    #     # #precisions = "F16"
+    #     return model_precisions
 
     model_info = {}
     for model_data in model_info_list:
@@ -209,15 +243,16 @@ def main():
             dl_dir = args.models_dir
             print(f"\nRunning on pre-converted IRs: {str(dl_dir)}\n")
         else:
-            dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test, args.precisions)
+            dl_dir = prepare_models(auto_tools_dir, args.downloader_cache_dir, args.mo, global_temp_dir, demos_to_test,
+                                    args.precisions)
 
         num_failures = 0
 
         python_module_subdir = "" if platform.system() == "Windows" else "/lib"
         demo_environment = {**os.environ,
-            'PYTHONIOENCODING': 'utf-8',
-            'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}{args.demo_build_dir}{python_module_subdir}",
-        }
+                            'PYTHONIOENCODING': 'utf-8',
+                            'PYTHONPATH': f"{os.environ['PYTHONPATH']}{os.pathsep}{args.demo_build_dir}{python_module_subdir}",
+                            }
 
         for demo in demos_to_test:
             print('Testing {}...'.format(demo.subdirectory))
@@ -226,9 +261,9 @@ def main():
 
             declared_model_names = set()
             for model_data in json.loads(subprocess.check_output(
-                    [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'),
-                        '--list', str(demo.models_lst_path(demos_dir))],
-                    universal_newlines=True)):
+                [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'),
+                 '--list', str(demo.models_lst_path(demos_dir))],
+                universal_newlines=True)):
                 models_list = model_data['model_stages'] if model_data['model_stages'] else [model_data]
                 for model in models_list:
                     declared_model_names.add(model['name'])
@@ -260,10 +295,12 @@ def main():
                     test_case_models = get_models(test_case, demo.model_keys)
 
                     case_args = [demo_arg
-                        for key, value in sorted(test_case.options.items())
-                        for demo_arg in option_to_args(key, value)]
+                                 for key, value in sorted(test_case.options.items())
+                                 for demo_arg in option_to_args(key, value)]
 
-                    case_model_names = {arg.name for arg in list(test_case.options.values()) + test_case.extra_models if isinstance(arg, ModelArg)}
+                    case_model_names = {arg.name for arg in list(test_case.options.values()) + test_case.extra_models if
+                                        isinstance(arg, ModelArg)}
+                    case_model_precisions = {arg.precision for arg in list(test_case.options.values()) + test_case.extra_models if isinstance(arg,ModelArg)} # precision field
 
                     undeclared_case_model_names = case_model_names - declared_model_names
                     if undeclared_case_model_names:
@@ -284,13 +321,13 @@ def main():
                                 skip = True
                         if skip: continue
                         print('Test case #{}/{}:'.format(test_case_index, device),
-                            ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
+                              ' '.join(shlex.quote(str(arg)) for arg in dev_arg + case_args))
                         print(flush=True)
                         try:
                             start_time = timeit.default_timer()
                             subprocess.check_output(fixed_args + dev_arg + case_args,
-                                stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
-                                env=demo_environment)
+                                                    stderr=subprocess.STDOUT, universal_newlines=True, encoding='utf-8',
+                                                    env=demo_environment)
                             execution_time = timeit.default_timer() - start_time
                         except subprocess.CalledProcessError as e:
                             print(e.output)
@@ -299,7 +336,8 @@ def main():
                             execution_time = -1
 
                         if args.report_file:
-                            collect_result(demo.subdirectory, device, case_model_names, execution_time, args.report_file)
+                            collect_result(demo.subdirectory, device, case_model_names,
+                                           execution_time, case_model_precisions, args.report_file)
 
             print()
 
