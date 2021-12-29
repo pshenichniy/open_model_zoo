@@ -85,8 +85,8 @@ def collect_result(demo_name, device, pipeline, execution_time, model_precisions
     with report_file.open('a+', newline='') as csvfile:
         testwriter = csv.writer(csvfile)
         if first_time:
-            testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "ExecutionTime", "Precision"])
-        testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)), execution_time, model_precisions])
+            testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "Precision", "ExecutionTime"])
+        testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)),  model_precisions, execution_time])
 
 
 @contextlib.contextmanager
@@ -307,8 +307,8 @@ def main():
                             execution_time = -1
 
                         if args.report_file:
-                            collect_result(demo.subdirectory, device, case_model_names,
-                                           execution_time, case_model_precisions, args.report_file)
+                            collect_result(demo.subdirectory, device, case_model_names, case_model_precisions,
+                                           execution_time, args.report_file)
 
             print()
 
