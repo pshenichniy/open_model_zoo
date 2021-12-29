@@ -79,7 +79,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def collect_result(demo_name, device, pipeline, execution_time, model_precisions, report_file):
+def collect_result(demo_name, device, pipeline, model_precisions, execution_time, report_file):
     first_time = not report_file.exists()
 
     with report_file.open('a+', newline='') as csvfile:
