@@ -136,20 +136,17 @@ NATIVE_DEMOS = [
         single_option_cases('-m',
             ModelArg('alexnet'),
             ModelArg('densenet-121-tf'),
-            ModelArg('densenet-169'),
             ModelArg('googlenet-v1'),
             ModelArg('googlenet-v1-tf'),
             ModelArg('googlenet-v3'),
             ModelArg('googlenet-v3-pytorch'),
-            ModelArg('efficientnet-b7-pytorch'),
             ModelArg('mixnet-l'),
             ModelArg('mobilenet-v2'),
             ModelArg('mobilenet-v2-pytorch'),
             ModelArg('repvgg-a0'),
             ModelArg('repvgg-b1'),
             ModelArg('repvgg-b3'),
-            ModelArg('resnet-50-caffe2')),
-    )),
+    ))),
 
     CppDemo(name='crossroad_camera_demo',
             model_keys=['-m', '-m_pa', '-m_reid'],
@@ -204,6 +201,22 @@ NATIVE_DEMOS = [
             '-m_fd',
             ModelArg('face-detection-adas-0001'),
             ModelArg('face-detection-retail-0004')),
+    )),
+
+    CppDemo(name='gesture_recognition_demo', implementation='cpp_gapi',
+            model_keys=['-m_a', '-m_d'],
+            device_keys=['-d_a', '-d_d'],
+            test_cases=combine_cases(
+        TestCase(options={'--no_show': None,
+                          '-i': TestDataArg('msasl/global_crops/_nz_sivss20/clip_0017/img_%05d.jpg'),
+                          '-m_d': ModelArg('person-detection-asl-0001')}),
+        [
+            TestCase(options={'-m_a': ModelArg('asl-recognition-0004'), '-c': str(OMZ_DIR / 'data/dataset_classes/msasl100.json')}),
+            TestCase(options={'-m_a': ModelArg('common-sign-language-0001'),
+                              '-c': str(OMZ_DIR / 'data/dataset_classes/jester27.json')}),
+            TestCase(options={'-m_a': ModelArg('common-sign-language-0002'),
+                              '-c': str(OMZ_DIR / 'data/dataset_classes/common_sign_language12.json')}),
+        ],
     )),
 
     CppDemo(name='face_detection_mtcnn_demo', implementation='cpp_gapi',
@@ -261,8 +274,8 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='interactive_face_detection_demo',
-            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp'],
-            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'],
+            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp', '-m_am'],
+            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp', '-d_am'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
@@ -275,6 +288,7 @@ NATIVE_DEMOS = [
                     TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
                     TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
                     TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
+                    TestCase(options={'-m_am': ModelArg('anti-spoof-mn3')}),
                 ],
             ),
             TestCase(options={
@@ -282,6 +296,7 @@ NATIVE_DEMOS = [
                 '-m_em': ModelArg('emotions-recognition-retail-0003'),
                 '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
                 '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+                '-m_am': ModelArg('anti-spoof-mn3'),
             })
         ],
         single_option_cases(
@@ -292,8 +307,8 @@ NATIVE_DEMOS = [
     )),
 
     CppDemo(name='interactive_face_detection_demo', implementation='cpp_gapi',
-            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp'],
-            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp'],
+            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp', '-m_am'],
+            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp', '-d_am'],
             test_cases=combine_cases(
         TestCase(options={'-no_show': None,
             **MONITORS,
@@ -306,6 +321,7 @@ NATIVE_DEMOS = [
                     TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
                     TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
                     TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
+                    TestCase(options={'-m_am': ModelArg('anti-spoof-mn3')}),
                 ],
             ),
             TestCase(options={
@@ -313,6 +329,7 @@ NATIVE_DEMOS = [
                 '-m_em': ModelArg('emotions-recognition-retail-0003'),
                 '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
                 '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+                '-m_am': ModelArg('anti-spoof-mn3'),
             })
         ],
         single_option_cases(
@@ -326,8 +343,6 @@ NATIVE_DEMOS = [
         TestCase(options={'-i': DataDirectoryArg('semantic-segmentation-adas')}),
         single_option_cases('-m',
             ModelArg('mask_rcnn_inception_resnet_v2_atrous_coco'),
-            ModelArg('mask_rcnn_inception_v2_coco'),
-            ModelArg('mask_rcnn_resnet101_atrous_coco'),
             ModelArg('mask_rcnn_resnet50_atrous_coco'))
     )),
 
@@ -373,7 +388,6 @@ NATIVE_DEMOS = [
                 TestCase(options={'-at': 'centernet'}),
                 [
                     *single_option_cases('-m',
-                        ModelArg('ctdet_coco_dlav0_384'),
                         ModelArg('ctdet_coco_dlav0_512'),
                     ),
                     *combine_cases(
@@ -382,7 +396,6 @@ NATIVE_DEMOS = [
                             '-scale_values': "73.695 69.87 70.89",
                         }),
                         single_option_cases('-m',
-                            ModelFileArg('ctdet_coco_dlav0_384', 'ctdet_coco_dlav0_384.onnx'),
                             ModelFileArg('ctdet_coco_dlav0_512', 'ctdet_coco_dlav0_512.onnx'),
                         ),
                     ),
@@ -439,8 +452,6 @@ NATIVE_DEMOS = [
                         ModelArg('ssd512'),
                         ModelArg('ssd_mobilenet_v1_coco'),
                         ModelArg('ssd_mobilenet_v1_fpn_coco'),
-                        ModelArg('ssd_mobilenet_v2_coco'),
-                        ModelArg('ssd_resnet50_v1_fpn_coco'),
                         ModelArg('ssdlite_mobilenet_v2'),
                         ModelArg('vehicle-detection-0200'),
                         ModelArg('vehicle-detection-0201'),
@@ -791,20 +802,17 @@ PYTHON_DEMOS = [
             *single_option_cases('-m',
                 ModelArg('alexnet'),
                 ModelArg('densenet-121-tf'),
-                ModelArg('densenet-169'),
                 ModelArg('googlenet-v1'),
                 ModelArg('googlenet-v1-tf'),
                 ModelArg('googlenet-v3'),
                 ModelArg('googlenet-v3-pytorch'),
-                ModelArg('efficientnet-b7-pytorch'),
                 ModelArg('mixnet-l'),
                 ModelArg('mobilenet-v2-pytorch'),
                 ModelArg('repvgg-a0'),
                 ModelArg('repvgg-b1'),
-                ModelArg('repvgg-b3'),
-                ModelArg('resnet-50-caffe2')),
+                ModelArg('repvgg-b3')),
 
-            TestCase(options={'-m': ModelFileArg('efficientnet-b7-pytorch', 'efficientnet-b7.onnx'),
+            TestCase(options={'-m': ModelFileArg('efficientnet-b0-pytorch', 'efficientnet-b0.onnx'),
                         '--reverse_input_channels': None,
                         '--mean_values': ['123.675', '116.28', '103.53'],
                         '--scale_values': ['58.395', '57.12', '57.375']}),
@@ -1028,7 +1036,6 @@ PYTHON_DEMOS = [
                 TestCase(options={'--architecture_type': 'centernet'}),
                 [
                     *single_option_cases('-m',
-                        ModelArg('ctdet_coco_dlav0_384'),
                         ModelArg('ctdet_coco_dlav0_512'),
                     ),
                     *combine_cases(
@@ -1037,7 +1044,6 @@ PYTHON_DEMOS = [
                             '--scale_values': ['73.695', '69.87', '70.89']
                         }),
                         single_option_cases('-m',
-                            ModelFileArg('ctdet_coco_dlav0_384', 'ctdet_coco_dlav0_384.onnx'),
                             ModelFileArg('ctdet_coco_dlav0_512', 'ctdet_coco_dlav0_512.onnx'),
                         ),
                     ),
@@ -1097,8 +1103,6 @@ PYTHON_DEMOS = [
                         ModelArg('ssd512'),
                         ModelArg('ssd_mobilenet_v1_coco'),
                         ModelArg('ssd_mobilenet_v1_fpn_coco'),
-                        ModelArg('ssd_mobilenet_v2_coco'),
-                        ModelArg('ssd_resnet50_v1_fpn_coco'),
                         ModelArg('ssd-resnet34-1200-onnx'),
                         ModelArg('ssdlite_mobilenet_v2'),
                         ModelArg('vehicle-detection-0200'),
