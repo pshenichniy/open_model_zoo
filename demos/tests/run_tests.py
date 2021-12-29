@@ -49,6 +49,8 @@ from data_sequences import DATA_SEQUENCES
 def parser_paths_list(supported_devices):
     paths = supported_devices.split(',')
     return [Path(p) for p in paths if Path(p).is_file()]
+
+
 # def parser_precisions(precisions):
 #     precisions_str = precisions
 #     return str(precisions_str)
@@ -86,7 +88,7 @@ def collect_result(demo_name, device, pipeline, model_precisions, execution_time
         testwriter = csv.writer(csvfile)
         if first_time:
             testwriter.writerow(["DemoName", "Device", "ModelsInPipeline", "Precision", "ExecutionTime"])
-        testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)),  model_precisions, execution_time])
+        testwriter.writerow([demo_name, device, " ".join(sorted(pipeline)), model_precisions, execution_time])
 
 
 @contextlib.contextmanager
@@ -181,7 +183,6 @@ def get_models(case, keys):
     return models
 
 
-
 def main():
     args = parse_args()
 
@@ -194,8 +195,6 @@ def main():
     model_info_list = json.loads(subprocess.check_output(
         [sys.executable, '--', str(auto_tools_dir / 'info_dumper.py'), '--all'],
         universal_newlines=True))
-
-
 
     model_info = {}
     for model_data in model_info_list:
@@ -271,7 +270,9 @@ def main():
 
                     case_model_names = {arg.name for arg in list(test_case.options.values()) + test_case.extra_models if
                                         isinstance(arg, ModelArg)}
-                    case_model_precisions = {arg.precision for arg in list(test_case.options.values()) + test_case.extra_models if isinstance(arg,ModelArg)} # precision field
+                    case_model_precisions = str(
+                        {arg.precision for arg in list(test_case.options.values()) + test_case.extra_models if
+                         isinstance(arg, ModelArg)})  # precision field
 
                     undeclared_case_model_names = case_model_names - declared_model_names
                     if undeclared_case_model_names:
