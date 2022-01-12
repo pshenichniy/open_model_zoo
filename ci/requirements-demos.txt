@@ -14,6 +14,8 @@ charset-normalizer==2.0.4
     # via requests
 cycler==0.10.0
     # via matplotlib
+dataclasses==0.8
+    # via transformers    
 decorator==5.0.9
     # via librosa
 flake8==3.9.2
