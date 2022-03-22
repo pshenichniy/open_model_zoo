@@ -55,12 +55,13 @@ class Arg:
 
 
 class ModelArg(Arg):
-    def __init__(self, name, precision=None):
+    def __init__(self, name,precision=None):
+        #self.framework = framework
         self.name = name
         self.precision = precision
 
     def resolve(self, context):
-        return str(context.dl_dir / context.model_info[self.name]["subdirectory"] / self.precision / (self.name + '.xml'))
+        return str(context.dl_dir / context.model_info[self.name]["subdirectory"] / self.precision / (self.name + '.xml'))#
 
     @property
     def required_models(self):
@@ -73,7 +74,7 @@ class ModelFileArg(Arg):
         self.file_name = file_name
 
     def resolve(self, context):
-        return str(context.dl_dir / context.model_info[self.model_name]["subdirectory"] / self.file_name)
+        return str(context.dl_dir / context.model_info[self.model_name]["subdirectory"] / self.file_name)###
 
     @property
     def required_models(self):

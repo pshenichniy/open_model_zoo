@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import re
+#import requests
 import requests
-
 from openvino.model_zoo.download_engine import base, validation
 
 

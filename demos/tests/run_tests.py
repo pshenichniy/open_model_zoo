@@ -188,7 +188,7 @@ def main():
 
     suppressed_devices = parse_supported_device_list(args.supported_devices)
 
-    omz_dir = (Path(__file__).parent / '../..').resolve()
+    omz_dir = (Path(__file__).parent / '../..').resolve() #
     demos_dir = omz_dir / 'demos'
     auto_tools_dir = omz_dir / 'tools/model_tools'
 
@@ -270,9 +270,8 @@ def main():
 
                     case_model_names = {arg.name for arg in list(test_case.options.values()) + test_case.extra_models if
                                         isinstance(arg, ModelArg)}
-                    case_model_precisions = str(
-                        {arg.precision for arg in list(test_case.options.values()) + test_case.extra_models if
-                         isinstance(arg, ModelArg)})  # precision field
+                    case_model_precisions = {arg.precision for arg in list(test_case.options.values()) + test_case.extra_models if
+                         isinstance(arg, ModelArg)}  # precision field
 
                     undeclared_case_model_names = case_model_names - declared_model_names
                     if undeclared_case_model_names:

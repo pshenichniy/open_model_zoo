@@ -134,7 +134,7 @@ NATIVE_DEMOS = [
             '-labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt'),
             '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt")}),
         single_option_cases('-m',
-            ModelArg('alexnet'),
+            #ModelArg('alexnet'),
             ModelArg('densenet-121-tf'),
             ModelArg('googlenet-v1'),
             ModelArg('googlenet-v1-tf'),
@@ -147,6 +147,67 @@ NATIVE_DEMOS = [
             ModelArg('repvgg-b1'),
             ModelArg('repvgg-b3'),
     ))),
+
+    CppDemo(name='Object Detection C++ Demo',
+            device_keys=['-d'],
+            test_cases=combine_cases(
+                TestCase(options={
+                    '-no_show': None,
+                    '-time': '5',
+                    '-i': DataDirectoryOrigFileNamesArg('inputVideo.mp4'),
+                    '-at': 'ssd',
+                    '-labels': str(OMZ_DIR / 'data/dataset_classes/voc_20cl_bkgr.txt')}),
+                single_option_cases('-m',
+                                    ModelArg('ssd_mobilenet_v1_coco '),
+                                    ModelArg('Mobilenet-SSD'),
+                                    ModelArg('ssd_mobilenet_v2'),
+
+                                    ))),
+
+    CppDemo(name='Classification C++ Demo',
+            device_keys=['-d'],
+            test_cases=combine_cases(
+                TestCase(options={
+                    '-no_show': None,
+                    '-time': '5',
+                    '-i': DataDirectoryOrigFileNamesArg('classification'),
+                    '-labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt'),
+                    '-gt': TestDataArg("ILSVRC2012_img_val/ILSVRC2012_val.txt")}),
+                single_option_cases('-m',
+                                    ModelArg('Googlenet-v1'),
+                                    ModelArg('inception-v3'),
+                                    ModelArg('mobilenent-v2'),
+                                    ))),
+
+    CppDemo(name='Image Segmentation C++ Demo',
+            device_keys=['-d'],
+            test_cases=combine_cases(
+                TestCase(options={
+                    '-no_show': None,
+                    '-time': '5',
+                    '-i': 0,
+                    # '-labels': str(OMZ_DIR / 'data/dataset_classes/imagenet_2012.txt'),
+                     '-m': OMZ_DIR / 'semantic-segmentation-adas-0001.xml'
+                    }),
+                single_option_cases('-m',
+                                    ModelArg('Deeplab-v3'),
+                                    ))),
+
+    CppDemo(name='Object Detection SSD C++ Sample',
+            device_keys=['-d'],
+            test_cases=combine_cases(
+                TestCase(options={
+                    '-no_show': None,
+                    '-time': '5',
+                    '-m': OMZ_DIR /'person-detection-retail-0013.xml',
+
+                    }),
+                single_option_cases('-m',
+                                    ModelArg('ssd_mobilenet_v1_coco '),
+                                    ModelArg('Mobilenet-SSD'),
+                                    ModelArg('ssd_mobilenet_v2'),
+
+                                    ))),
 
     CppDemo(name='crossroad_camera_demo',
             model_keys=['-m', '-m_pa', '-m_reid'],
@@ -273,38 +334,38 @@ NATIVE_DEMOS = [
         ]
     )),
 
-    CppDemo(name='interactive_face_detection_demo',
-            model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp', '-m_am'],
-            device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp', '-d_am'],
-            test_cases=combine_cases(
-        TestCase(options={'-no_show': None,
-            **MONITORS,
-            '-i': DataPatternArg('375x500')}),
-        [
-            *combine_cases(
-                [
-                    TestCase(options={}),
-                    TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')}),
-                    TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
-                    TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
-                    TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
-                    TestCase(options={'-m_am': ModelArg('anti-spoof-mn3')}),
-                ],
-            ),
-            TestCase(options={
-                '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
-                '-m_em': ModelArg('emotions-recognition-retail-0003'),
-                '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
-                '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
-                '-m_am': ModelArg('anti-spoof-mn3'),
-            })
-        ],
-        single_option_cases(
-            '-m',
-            ModelArg('face-detection-adas-0001'),
-            ModelArg('face-detection-retail-0004'),
-        ),
-    )),
+    # CppDemo(name='interactive_face_detection_demo',
+    #         model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp', '-m_am'],
+    #         device_keys=['-d', '-d_ag', '-d_em', '-d_lm', '-d_hp', '-d_am'],
+    #         test_cases=combine_cases(
+    #     TestCase(options={'-no_show': None,
+    #         **MONITORS,
+    #         '-i': DataPatternArg('375x500')}),
+    #     [
+    #         *combine_cases(
+    #             [
+    #                 TestCase(options={}),
+    #                 TestCase(options={'-m_ag': ModelArg('age-gender-recognition-retail-0013')})
+    #                 # TestCase(options={'-m_em': ModelArg('emotions-recognition-retail-0003')}),
+    #                 # TestCase(options={'-m_lm': ModelArg('facial-landmarks-35-adas-0002')}),
+    #                 # TestCase(options={'-m_hp': ModelArg('head-pose-estimation-adas-0001')}),
+    #                 # TestCase(options={'-m_am': ModelArg('anti-spoof-mn3')}),
+    #             ],
+    #         ),
+    #         TestCase(options={
+    #             '-m_ag': ModelArg('age-gender-recognition-retail-0013'),
+    #             '-m_em': ModelArg('emotions-recognition-retail-0003'),
+    #             '-m_hp': ModelArg('head-pose-estimation-adas-0001'),
+    #             '-m_lm': ModelArg('facial-landmarks-35-adas-0002'),
+    #             '-m_am': ModelArg('anti-spoof-mn3'),
+    #         })
+    #     ],
+    #     single_option_cases(
+    #         '-m',
+    #         ModelArg('face-detection-adas-0001'),
+    #         ModelArg('face-detection-retail-0004'),
+    #     ),
+    # )),
 
     CppDemo(name='interactive_face_detection_demo', implementation='cpp_gapi',
             model_keys=['-m', '-m_ag', '-m_em', '-m_lm', '-m_hp', '-m_am'],
